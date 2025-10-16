@@ -18,9 +18,11 @@ pub fn build(b: *std.Build) void {
 
 	// Library unit tests.
 	const lib_unit_tests = b.addTest(.{
-		.root_source_file = b.path("src/lib.zig"),
-		.target = target,
-		.optimize = optimize,
+		.root_module = b.createModule(.{
+			.root_source_file = b.path("src/lib.zig"),
+			.target = target,
+			.optimize = optimize,
+		}),
 	});
 	lib_unit_tests.linkLibC();
 	lib_unit_tests.addIncludePath(b.path("anyascii"));
