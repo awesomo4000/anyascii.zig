@@ -5,3 +5,12 @@
 # Zig
 .zig-cache/
 zig-out/
+
+#
+CLAUDE.md
+
+#
+.DS_Store
+
+#
+x/
