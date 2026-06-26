@@ -19,7 +19,7 @@ pub fn anyascii(allocator: std.mem.Allocator, codepoint: u21) ![]u8 {
 }
 
 /// Convert a unicode codepoint to its ascii equivalent, in the provided writer.
-pub fn anyasciiWrite(writer: std.io.AnyWriter, codepoint: u21) !void {
+pub fn anyasciiWrite(writer: *std.Io.Writer, codepoint: u21) !void {
 	// Call C anyascii function.
 	var cChars: [*]u8 = undefined;
 	const charsCount = c.anyascii(codepoint, @ptrCast(&cChars));
@@ -35,12 +35,12 @@ pub fn utf8ToAscii(allocator: std.mem.Allocator, str: []const u8) ![]u8 {
 	// Get a UTF8 iterator.
 	var iterator = (try std.unicode.Utf8View.init(str)).iterator();
 
-	// Initialize a out string array list where ascii equivalents will be appended.
-	var outStr = try std.ArrayList(u8).initCapacity(allocator, str.len | 15);
-	defer outStr.deinit(allocator);
+	// Initialize an allocating writer where ascii equivalents will be appended.
+	var outStr = try std.Io.Writer.Allocating.initCapacity(allocator, str.len | 15);
+	defer outStr.deinit();
 
-	// Get a writer to the array list.
-	const writer = outStr.writer(allocator).any();
+	// Get a writer to the allocating buffer.
+	const writer = &outStr.writer;
 
 	// For each codepoint, convert it to ascii.
 	while (iterator.nextCodepoint()) |codepoint| {
@@ -48,7 +48,7 @@ pub fn utf8ToAscii(allocator: std.mem.Allocator, str: []const u8) ![]u8 {
 	}
 
 	// Return the built full ascii equivalent.
-	return outStr.toOwnedSlice(allocator);
+	return outStr.toOwnedSlice();
 }
 
 test anyascii {
